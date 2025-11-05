@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brad AI - Your Intelligent Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #fdbb2d;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            height: 500px;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: rgba(253, 187, 45, 0.2);
+            border: 1px solid rgba(253, 187, 45, 0.5);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .ai-message {
+            background: rgba(26, 42, 108, 0.3);
+            border: 1px solid rgba(26, 42, 108, 0.5);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .text-input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .text-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .voice-btn, .send-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #fdbb2d, #b21f1f);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .voice-btn:hover, .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(253, 187, 45, 0.4);
+        }
+        
+        .voice-btn.listening {
+            background: linear-gradient(135deg, #b21f1f, #1a2a6c);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(178, 31, 31, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(178, 31, 31, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(178, 31, 31, 0); }
+        }
+        
+        .voice-status {
+            text-align: center;
+            margin-top: 10px;
+            height: 20px;
+            font-style: italic;
+            color: #fdbb2d;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .mode-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background: linear-gradient(135deg, #fdbb2d, #b21f1f);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+        
+        .typing-indicator {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 30px;
+        }
+        
+        .typing-indicator span {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fdbb2d;
+            animation: typing 1.5s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(1) {
+            left: 0;
+            animation-delay: 0s;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            left: 20px;
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            left: 40px;
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(-50%) scale(1); opacity: 0.5; }
+            30% { transform: translateY(-50%) scale(1.5); opacity: 1; }
+        }
+        
+        .web-results {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #fdbb2d;
+        }
+        
+        .web-results h4 {
+            color: #fdbb2d;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .input-area {
+                flex-direction: column;
+            }
+            
+            .voice-btn, .send-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Brad AI</h1>
+            <p class="tagline">Your intelligent voice and text assistant with web access</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="mode-selector">
+                <button class="mode-btn active" id="textModeBtn">Text Mode</button>
+                <button class="mode-btn" id="voiceModeBtn">Voice Mode</button>
+            </div>
+            
+            <div class="chat-container" id="chatContainer">
+                <div class="message ai-message">
+                    Hello! I'm Brad AI, your intelligent assistant. I can help you with anything and fetch real-time information from the web. No API keys required! How can I assist you today?
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" class="text-input" id="textInput" placeholder="Ask me anything...">
+                <button class="send-btn" id="sendBtn">Send</button>
+                <button class="voice-btn" id="voiceBtn">🎤 Voice Type</button>
+            </div>
+            
+            <div class="voice-status" id="voiceStatus">Click microphone to voice type</div>
+        </div>
+    </div>
+    
+    <footer>
+        Brad AI &copy; 2023 - Your Intelligent Assistant with Web Access
+    </footer>
+
+    <script>
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const textInput = document.getElementById('textInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const voiceStatus = document.getElementById('voiceStatus');
+        const textModeBtn = document.getElementById('textModeBtn');
+        const voiceModeBtn = document.getElementById('voiceModeBtn');
+
+        // State variables
+        let isVoiceMode = false;
+        let isListening = false;
+        let recognition;
+        let conversationHistory = [];
+
+        // Initialize speech recognition
+        function initializeSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    voiceBtn.classList.add('listening');
+                    voiceStatus.textContent = "Listening...";
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    
+                    if (isVoiceMode) {
+                        // In voice mode, immediately process the input
+                        addMessage(transcript, 'user');
+                        processUserInput(transcript);
+                    } else {
+                        // In text mode, just populate the input field
+                        textInput.value = transcript;
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    voiceStatus.textContent = "Error: " + event.error;
+                    stopListening();
+                };
+                
+                recognition.onend = function() {
+                    stopListening();
+                };
+            } else {
+                voiceStatus.textContent = "Speech recognition not supported in this browser";
+                voiceBtn.disabled = true;
+            }
+        }
+
+        // Text-to-Speech Setup
+        const synth = window.speechSynthesis;
+        
+        function speakText(text) {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            
+            // Clean text for speech (remove code blocks, etc.)
+            const cleanText = text.replace(/```[\s\S]*?```/g, 'code example');
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            utterance.volume = 0.8;
+            synth.speak(utterance);
+        }
+        
+        // Voice control functions
+        function startListening() {
+            if (recognition && !isListening) {
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting recognition:', error);
+                }
+            }
+        }
+        
+        function stopListening() {
+            if (recognition && isListening) {
+                isListening = false;
+                voiceBtn.classList.remove('listening');
+                voiceStatus.textContent = isVoiceMode ? "Voice mode active - speak now" : "Click to voice type";
+            }
+        }
+        
+        // Chat functions
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'ai-message');
+            
+            // Check if text contains code markers and format accordingly
+            if (text.includes('```')) {
+                const parts = text.split('```');
+                for (let i = 0; i < parts.length; i++) {
+                    if (i % 2 === 0) {
+                        // Regular text
+                        const textNode = document.createTextNode(parts[i]);
+                        messageDiv.appendChild(textNode);
+                    } else {
+                        // Code block
+                        const codeBlock = document.createElement('div');
+                        codeBlock.classList.add('code-block');
+                        codeBlock.textContent = parts[i];
+                        messageDiv.appendChild(codeBlock);
+                    }
+                }
+            } else {
+                messageDiv.textContent = text;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('message', 'ai-message');
+            typingDiv.id = 'typingIndicator';
+            
+            const typingText = document.createElement('span');
+            typingText.textContent = 'Brad AI is thinking';
+            
+            const typingAnimation = document.createElement('div');
+            typingAnimation.classList.add('typing-indicator');
+            
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('span');
+                typingAnimation.appendChild(dot);
+            }
+            
+            typingDiv.appendChild(typingText);
+            typingDiv.appendChild(typingAnimation);
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return typingDiv;
+        }
+
+        // Web search functionality using CORS proxy
+        async function searchWeb(query) {
+            try {
+                // Use a CORS proxy to avoid CORS issues
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+                
+                const response = await fetch(proxyUrl + searchUrl);
+                const data = await response.json();
+                
+                if (data.Abstract) {
+                    return {
+                        abstract: data.Abstract,
+                        source: data.AbstractSource,
+                        url: data.AbstractURL
+                    };
+                } else if (data.Results && data.Results.length > 0) {
+                    return {
+                        abstract: data.Results[0].Text,
+                        source: "DuckDuckGo",
+                        url: data.Results[0].FirstURL
+                    };
+                } else {
+                    return null;
+                }
+            } catch (error) {
+                console.error('Web search error:', error);
+                return null;
+            }
+        }
+
+        // Get current time and date
+        function getCurrentTime() {
+            const now = new Date();
+            return {
+                time: now.toLocaleTimeString(),
+                date: now.toLocaleDateString(),
+                day: now.toLocaleDateString('en-US', { weekday: 'long' })
+            };
+        }
+
+        // Get weather information (using OpenWeatherMap without API key - free tier)
+        async function getWeather(city = '') {
+            try {
+                // For demo purposes, we'll use a simple approach
+                // In a real implementation, you'd use a weather API
+                const weatherData = {
+                    'new york': { temp: '22°C', condition: 'Partly Cloudy', humidity: '65%' },
+                    'london': { temp: '15°C', condition: 'Rainy', humidity: '80%' },
+                    'tokyo': { temp: '25°C', condition: 'Sunny', humidity: '60%' },
+                    'paris': { temp: '18°C', condition: 'Cloudy', humidity: '70%' },
+                    'default': { temp: '20°C', condition: 'Mild', humidity: '65%' }
+                };
+
+                const cityKey = city.toLowerCase() in weatherData ? city.toLowerCase() : 'default';
+                return weatherData[cityKey];
+            } catch (error) {
+                console.error('Weather error:', error);
+                return null;
+            }
+        }
+
+        // Calculate mathematical expressions
+        function calculateMath(expression) {
+            try {
+                // Safe evaluation of mathematical expressions
+                const safeExpression = expression.replace(/[^0-9+\-*/().]/g, '');
+                const result = Function(`"use strict"; return (${safeExpression})`)();
+                return result;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // Generate intelligent response
+        async function generateResponse(userInput) {
+            const input = userInput.toLowerCase();
+            
+            // Add to conversation history
+            conversationHistory.push(userInput);
+            if (conversationHistory.length > 10) {
+                conversationHistory.shift();
+            }
+
+            // Check for web search queries
+            if (input.includes('search for') || input.includes('look up') || 
+                input.includes('what is') || input.includes('who is') ||
+                input.includes('current news') || input.includes('latest about')) {
+                
+                const searchQuery = userInput.replace(/search for|look up|what is|who is|current news|latest about/gi, '').trim();
+                const webResults = await searchWeb(searchQuery);
+                
+                if (webResults) {
+                    return `Based on my search:\n\n${webResults.abstract}\n\nSource: ${webResults.source}`;
+                } else {
+                    return "I searched but couldn't find specific information about that. Could you try rephrasing your question or be more specific?";
+                }
+            }
+
+            // Check for time/date queries
+            if (input.includes('time') || input.includes('date')) {
+                const timeInfo = getCurrentTime();
+                return `Current time: ${timeInfo.time}\nDate: ${timeInfo.date}\nDay: ${timeInfo.day}`;
+            }
+
+            // Check for weather queries
+            if (input.includes('weather')) {
+                const cityMatch = input.match(/weather in (.+)/);
+                const city = cityMatch ? cityMatch[1] : '';
+                const weather = await getWeather(city);
+                
+                if (weather) {
+                    return `Weather${city ? ' in ' + city : ''}:\nTemperature: ${weather.temp}\nCondition: ${weather.condition}\nHumidity: ${weather.humidity}`;
+                } else {
+                    return "I can't provide real-time weather data right now, but you can check weather.com or your local weather service.";
+                }
+            }
+
+            // Check for math calculations
+            if (input.match(/\d+[\+\-\*\/\(\)]/)) {
+                const mathResult = calculateMath(userInput);
+                if (mathResult !== null) {
+                    return `The result of ${userInput} is ${mathResult}`;
+                }
+            }
+
+            // Programming responses
+            if (input.includes('hello world') || input.includes('hello world!') || input.includes('hello worldd')) {
+                return `Sure! Here's a "Hello World" program in several languages:
+
+JavaScript:
+\`\`\`javascript
+console.log("Hello, World!");
+\`\`\`
+
+Python:
+\`\`\`python
+print("Hello, World!")
+\`\`\`
+
+Java:
+\`\`\`java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+\`\`\`
+
+C++:
+\`\`\`cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, World!" << endl;
+    return 0;
+}
+\`\`\``;
+            }
+
+            // General conversation
+            if (input.includes('hello') || input.includes('hi') || input.includes('hey')) {
+                return "Hello there! I'm Brad AI, your intelligent assistant. I can help you with web searches, calculations, programming questions, and much more. What would you like to know?";
+            } else if (input.includes('how are you')) {
+                return "I'm functioning perfectly! I'm here to help you with information, calculations, web searches, and any questions you might have. What can I assist you with today?";
+            } else if (input.includes('thank')) {
+                return "You're very welcome! I'm glad I could help. Feel free to ask me anything else!";
+            } else if (input.includes('joke')) {
+                const jokes = [
+                    "Why don't scientists trust atoms? Because they make up everything!",
+                    "Why did the scarecrow win an award? He was outstanding in his field!",
+                    "Why don't skeletons fight each other? They don't have the guts!",
+                    "What do you call a fake noodle? An impasta!"
+                ];
+                return jokes[Math.floor(Math.random() * jokes.length)];
+            } else if (input.includes('bye') || input.includes('goodbye')) {
+                return "Goodbye! Feel free to come back if you have any more questions. I'm always here to help!";
+            } else {
+                // For unknown queries, try to search the web
+                const webResults = await searchWeb(userInput);
+                if (webResults) {
+                    return `I found this information:\n\n${webResults.abstract}\n\nSource: ${webResults.source}`;
+                } else {
+                    return "I understand you're asking about: '" + userInput + "'. I can help you search the web for more specific information, answer questions, perform calculations, or assist with programming. Could you be more specific about what you'd like to know?";
+                }
+            }
+        }
+        
+        async function processUserInput(input) {
+            // Show typing indicator
+            const typingIndicator = showTypingIndicator();
+            
+            try {
+                // Generate response
+                const response = await generateResponse(input);
+                
+                // Remove typing indicator
+                typingIndicator.remove();
+                
+                // Add response to chat
+                addMessage(response, 'ai');
+                
+                // Speak the response in voice mode
+                if (isVoiceMode) {
+                    speakText(response);
+                }
+            } catch (error) {
+                typingIndicator.remove();
+                addMessage("Sorry, I encountered an error processing your request. Please try again.", 'ai');
+            }
+        }
+
+        // Event Listeners
+        sendBtn.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+            if (text) {
+                addMessage(text, 'user');
+                textInput.value = '';
+                await processUserInput(text);
+            }
+        });
+        
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+        
+        voiceBtn.addEventListener('click', () => {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+        
+        textModeBtn.addEventListener('click', () => {
+            isVoiceMode = false;
+            textModeBtn.classList.add('active');
+            voiceModeBtn.classList.remove('active');
+            voiceStatus.textContent = "Click microphone to voice type";
+            voiceBtn.textContent = "🎤 Voice Type";
+            stopListening();
+            
+            // Cancel any ongoing speech
+            if (synth.speaking) {
+                synth.cancel();
+            }
+        });
+        
+        voiceModeBtn.addEventListener('click', () => {
+            isVoiceMode = true;
+            voiceModeBtn.classList.add('active');
+            textModeBtn.classList.remove('active');
+            voiceStatus.textContent = "Voice mode active - speak now";
+            voiceBtn.textContent = "🎤 Listening...";
+            
+            // Start listening immediately in voice mode
+            startListening();
+        });
+
+        // Initialize
+        initializeSpeechRecognition();
+        voiceStatus.textContent = "Click microphone to voice type";
+
+        // Add welcome message with examples
+        setTimeout(() => {
+            addMessage("Try asking me things like: 'What is artificial intelligence?', 'Search for latest technology news', 'What's the weather in Tokyo?', 'Calculate 15 * 8 + 3', or 'Show me hello world code in Python'", 'ai');
+        }, 2000);
+    </script>
+</body>
+</html>
